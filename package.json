@@ -1,0 +1,38 @@
+{
+  "name": "runjournal-server",
+  "version": "1.0.0",
+  "description": "backend server for runjournal.fit",
+  "main": "app.js",
+  "engine": {
+    "node": "14.x"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RoudyBob/runjournal-server.git"
+  },
+  "author": "Bob Roudebush",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RoudyBob/runjournal-server/issues"
+  },
+  "homepage": "https://github.com/RoudyBob/runjournal-server#readme",
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "save": "^2.4.0",
+    "sequelize": "^5.22.3",
+    "sequelize-cli": "^6.2.0"
+  }
+}
