@@ -17,5 +17,5 @@ module.exports = {
   User,
   Plan,
   Workout,
-  Team
+  Team,
 };

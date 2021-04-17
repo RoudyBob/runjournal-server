@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../db').import('../models/user');
+const { User } = require('../models');
 
 const validateSession = (req, res, next) => {
     const token = req.headers.authorization;
@@ -14,7 +14,8 @@ const validateSession = (req, res, next) => {
                 User.findOne({
                     where: {
                         id: decodeToken.id
-                    }
+                    },
+                    include: "team"
                 })
                 .then (user => {
                     console.log('user --> ', user);

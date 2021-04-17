@@ -14,6 +14,7 @@ const controllers = require("./controllers");
 
 // Controllers used by the backend
 app.use('/user', controllers.User);
+app.use('/team', controllers.Team);
 app.use('/plan', controllers.Plan);
 app.use('/workout', controllers.Workout);
 
