@@ -1,21 +1,19 @@
-module.exports = (sequelize, DataTypes) => {
-    const Team = sequelize.define('team', {
-        firstname: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        lastname: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        runnerid: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        coachid: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        }
-    })
-    return Team;
-} 
+const { DataTypes } = require("sequelize");
+const db = require("../db");
+
+const Team = db.define('team', {
+    firstname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    lastname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    runners: {
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: true
+    }
+});
+
+module.exports = Team;

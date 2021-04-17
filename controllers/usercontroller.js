@@ -1,8 +1,7 @@
-const express = require('express');
-const Sequelize = require('../db');
-const User = require('../db').import('../models/user');
-const Team = require('../db').import('../models/team');
-const router = express.Router();
+const { User } = require('../models');
+const { Team } = require('../models');
+const { Router } = require('express');
+const router = Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const validateSession = require ('../middleware/validate-session');
@@ -17,10 +16,18 @@ router.post('/signup', function (req, res) {
         weekstart: req.body.user.weekstart,
         defaultunits: req.body.user.defaultunits,
         coach: req.body.user.coach,
-        coachteam: req.body.user.coachteam
     })
     .then(
         function createSuccess(user) {
+            if (req.body.user.coach === true) {
+                Team.create({
+                    firstname: req.body.user.firstname,
+                    lastname: req.body.user.lastname,
+                    userId: user.id,
+                })
+                .then(team => res.status(200).json(team))
+                .catch(err => res.status(500).json({ error: err }))
+            }
            let token = jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24});
            res.json({
                user: user,
@@ -40,8 +47,19 @@ router.put('/:id', validateSession, function (req, res) {
         weekstart: req.body.user.weekstart,
         defaultunits: req.body.user.defaultunits,
         coach: req.body.user.coach,
-        coachteam: req.body.user.coachteam
     };
+
+    // if (req.body.user.coach === true) {
+    //     Team.create({
+    //         firstname: req.body.user.firstname,
+    //         lastname: req.body.user.lastname,
+    //         userId: req.user.id,
+    //     })
+    //     .then(team => res.status(200).json(team))
+    //     .catch(err => res.status(500).json({ error: err }))
+    // }
+
+    // Add in here check to see if it changed and handle appropriately
 
     const query = { where: { id: req.params.id, id: req.user.id }};
 
@@ -54,7 +72,8 @@ router.post('/login', function (req, res) {
     User.findOne({
         where: {
             email: req.body.user.email
-        }
+        },
+        include: "team"
     })
     .then(
         function loginSuccess(user) {
@@ -83,7 +102,8 @@ router.post('/login', function (req, res) {
 router.get('/', validateSession, function (req, res) {
     User.findAll({
         where: {coach: true},
-        attributes: ['id', 'email', 'firstname', 'lastname']
+        attributes: ['id', 'email', 'firstname', 'lastname'],
+        include: "team"
     })
     .then(users => res.status(200).json(users))
     .catch(err => res.status(500).json({ error: err }));
