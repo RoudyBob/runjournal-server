@@ -26,7 +26,7 @@ router.post('/', validateSession, function (req, res) {
 });
 
 // Don't need coaches to be able to do this. They are only going to modify plans.
-router.put('/:id', validateSession, function (req, res) {
+router.put('/update/:id', validateSession, function (req, res) {
     const updateWorkout = {
         timestamp: req.body.workout.timestamp,
         description: req.body.workout.description,
@@ -58,6 +58,28 @@ router.get('/mine', validateSession, function (req, res) {
 
     Workout.findAll(query)
         .then((workouts) => res.status(200).json(workouts))
+        .catch((err) => res.status(500).json({ error: err }));
+})
+
+// This will only work for coaches and the owners of workouts
+router.get('/get/:id', validateSession, function (req, res) {
+    if (req.user.team) {
+        if (req.user.team.runners) {
+            if (!req.user.team.runners.includes(parseInt(req.params.id))) {
+                // Deny access if not a coach and the id doesn't match one of their runners
+                return res.status(403).json({ message: "You are not this runner's coach." })
+            } 
+        } else if (req.user.team.runners === null) {
+                // Deny access if not a coach has no runners
+                return res.status(403).json({ message: "You are not this runner's coach." })
+        }
+    }
+    const query = {
+        where: {id: req.params.id}
+    }
+
+    Workout.findOne(query)
+        .then((workout) => res.status(200).json(workout))
         .catch((err) => res.status(500).json({ error: err }));
 })
 
