@@ -18,7 +18,7 @@ router.post('/', validateSession, function (req, res) {
     .catch(err => res.status(500).json({ error: err }));
 });
 
-router.put('/:id', validateSession, function (req, res) {
+router.put('/update/:id', validateSession, function (req, res) {
     const updatePlan = {
         date: req.body.plan.date,
         description: req.body.plan.description,
@@ -54,6 +54,28 @@ router.get('/mine', validateSession, function (req, res) {
     }
 
     Plan.findAll(query)
+        .then((plans) => res.status(200).json(plans))
+        .catch((err) => res.status(500).json({ error: err }));
+})
+
+// Only can pull the plans for specific userID if you're that user's coach
+router.get('/get/:id', validateSession, function (req, res) {
+    if (req.user.team) {
+        if (req.user.team.runners) {
+            if (!req.user.team.runners.includes(parseInt(req.params.id))) {
+                // Deny access if not a coach and the id doesn't match one of their runners
+                return res.status(403).json({ message: "You are not this runner's coach." })
+            } 
+        } else if (req.user.team.runners === null) {
+                // Deny access if not a coach has no runners
+                return res.status(403).json({ message: "You are not this runner's coach." })
+        }
+    }
+    const query = {
+        where: {id: req.params.id}
+    }
+
+    Plan.findOne(query)
         .then((plans) => res.status(200).json(plans))
         .catch((err) => res.status(500).json({ error: err }));
 })
