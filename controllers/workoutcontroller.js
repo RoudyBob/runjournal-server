@@ -47,7 +47,7 @@ router.put('/update/:id', validateSession, function (req, res) {
     const query = { where: { id: req.params.id, userId: req.user.id }};
 
     Workout.update(updateWorkout, query)
-    .then((rowsAffected) => res.status(200).json(rowsAffected))
+    .then((rowsAffected) => res.status(200).json({message: `${rowsAffected} entries updated.`}))
     .catch((err) => res.status(500).json({ error: err }));
 })
 
