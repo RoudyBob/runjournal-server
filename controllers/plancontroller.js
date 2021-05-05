@@ -31,7 +31,7 @@ router.put('/update/:id', validateSession, function (req, res) {
         units: req.body.plan.units,
         time: req.body.plan.time,
         notes: req.body.plan.notes,
-        userId: req.body.plan.id
+        userId: req.body.plan.userId
     };
     
     if (!req.user.coach) {
@@ -46,14 +46,17 @@ router.put('/update/:id', validateSession, function (req, res) {
         const query = {
             where: {id: req.params.id} 
         }
-
-        if (req.user.team.runners) {
+        if (req.user.id == updatePlan.userId) { // User is a coach but this is their plan
+            Plan.update(updatePlan, query)
+            .then((rowsAffected) => res.status(200).json({message: `${rowsAffected} entries updated.`}))
+            .catch((err) => res.status(500).json({ error: err }));
+        } else if (req.user.team.runners) {
             if (req.user.team.runners.includes(parseInt(updatePlan.userId))) {
                 Plan.update(updatePlan, query)
                 .then((rowsAffected) => res.status(200).json({message: `${rowsAffected} entries updated.`}))
                 .catch((err) => res.status(500).json({ error: err }));
             } else {
-                res.status(403).json({ message: "Unauthorized - You are not this runner's coach." })
+                res.status(403).json({ message: "Unauthorized - You are not this runner's coach.", userId: updatePlan })
             }
         } else if (req.user.team.runners == null) {
             res.status(500).json({ message: "(NULL) Runners Array is Empty" })
@@ -93,10 +96,10 @@ router.get('/get/:id', validateSession, function (req, res) {
         Plan.findOne(query)
         .then((plan) => {
             if (req.user.id == plan.userId) {
-                res.status(200).json({ plan: plan }) // User is a coach but this is their workout
+                res.status(200).json(plan) // User is a coach but this is their plan
             } else if (req.user.team.runners) {
                 if (req.user.team.runners.includes(parseInt(plan.userId))) {
-                    res.status(200).json({ plan: plan })
+                    res.status(200).json(plan)
                 } else {
                     res.status(403).json({ message: "Unauthorized - You are not this runner's coach." })
                 }

@@ -85,10 +85,10 @@ router.get('/get/:id', validateSession, function (req, res) {
         Workout.findOne(query)
         .then((workout) => {
             if (req.user.id == workout.userId) {
-                res.status(200).json({ workout: workout }) // User is a coach but this is their workout
+                res.status(200).json(workout) // User is a coach but this is their workout
             } else if (req.user.team.runners) {
                 if (req.user.team.runners.includes(parseInt(workout.userId))) {
-                    res.status(200).json({ workout: workout })
+                    res.status(200).json(workout)
                 } else {
                     res.status(403).json({ message: "Unauthorized - You are not this runner's coach." })
                 }
