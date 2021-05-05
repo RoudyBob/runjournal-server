@@ -15,7 +15,7 @@ const Plan = db.define('plan', {
         allowNull: false
     },
     distance: {
-        type: DataTypes.DECIMAL,
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     units: {

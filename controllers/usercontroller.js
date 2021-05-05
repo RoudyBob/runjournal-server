@@ -23,6 +23,7 @@ router.post('/signup', function (req, res) {
                 Team.create({
                     firstname: req.body.user.firstname,
                     lastname: req.body.user.lastname,
+                    runners: [],
                     userId: user.id,
                 })
                 .then(team => res.status(200).json(team))
@@ -48,18 +49,6 @@ router.put('/:id', validateSession, function (req, res) {
         defaultunits: req.body.user.defaultunits,
         coach: req.body.user.coach,
     };
-
-    // if (req.body.user.coach === true) {
-    //     Team.create({
-    //         firstname: req.body.user.firstname,
-    //         lastname: req.body.user.lastname,
-    //         userId: req.user.id,
-    //     })
-    //     .then(team => res.status(200).json(team))
-    //     .catch(err => res.status(500).json({ error: err }))
-    // }
-
-    // Add in here check to see if it changed and handle appropriately
 
     const query = { where: { id: req.params.id, id: req.user.id }};
 
@@ -99,6 +88,42 @@ router.post('/login', function (req, res) {
     .catch(err => res.status(500).json({error: err}));
 })
 
+router.get('/:id', validateSession, function (req, res) {
+    if (req.user.id == req.params.id) {
+
+        const query = {
+            where: {id: req.params.id}
+        }
+    
+        User.findOne(query)
+            .then((user) => res.status(200).json(user))
+            .catch((err) => res.status(500).json({ error: err }));
+
+    } else if (req.user.team) {
+        if (req.user.team.runners) {
+            if (!req.user.team.runners.includes(parseInt(req.params.id))) {
+                // Deny access if not a coach and the id doesn't match one of their runners
+                return res.status(403).json({ message: "You are not this runner's coach." })
+            } 
+        } else if (req.user.team.runners === null) {
+                // Deny access if not a coach has no runners
+                return res.status(403).json({ message: "You are not this runner's coach", team: req.user.team })
+        }
+
+        const query = {
+            where: {id: req.params.id}
+        }
+    
+        User.findOne(query)
+            .then((user) => res.status(200).json(user))
+            .catch((err) => res.status(500).json({ error: err }));
+
+    } else {
+        // User Doesn't Match and They Aren't a Coach
+        return res.status(403).json({ message: "Access Denied." })
+    }
+});
+
 router.get('/', validateSession, function (req, res) {
     User.findAll({
         where: {coach: true},
@@ -108,12 +133,5 @@ router.get('/', validateSession, function (req, res) {
     .then(users => res.status(200).json(users))
     .catch(err => res.status(500).json({ error: err }));
 })
-
-// router.get('/', validateSession, function (req, res) {
-//     console.log(req);
-//     User.findAll()
-//     .then(users => res.status(200).json(users))
-//     .catch(err => res.status(500).json({ error: err }))
-// });
 
 module.exports = router;

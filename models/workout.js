@@ -11,7 +11,7 @@ const Workout = db.define('workout', {
         allowNull: false
     },
     distance: {
-        type: DataTypes.DECIMAL,
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     units: {
@@ -27,27 +27,27 @@ const Workout = db.define('workout', {
         allowNull: true
     },
     elevationgain: {
-        type: DataTypes.DECIMAL,
+        type: DataTypes.FLOAT,
         allowNull: true
     },
     startlocation: {
-        type: DataTypes.ARRAY(DataTypes.DECIMAL),
+        type: DataTypes.ARRAY(DataTypes.FLOAT),
         allowNull: true
     },
     endlocation: {
-        type: DataTypes.ARRAY(DataTypes.DECIMAL),
+        type: DataTypes.ARRAY(DataTypes.FLOAT),
         allowNull: true
     },
     temp: {
-        type: DataTypes.DECIMAL,
+        type: DataTypes.FLOAT,
         allowNull: true
     },
     humidity: {
-        type: DataTypes.DECIMAL,
+        type: DataTypes.FLOAT,
         allowNull: true
     },
     aqi: {
-        type: DataTypes.DECIMAL,
+        type: DataTypes.FLOAT,
         allowNull: true
     },
     notes: {
