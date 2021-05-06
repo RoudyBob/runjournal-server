@@ -78,11 +78,11 @@ router.post('/login', function (req, res) {
                         })
 
                     } else {
-                        res.status(502).send({ error: 'Login Failed' });
+                        return res.status(502).send({ error: 'Login Failed' });
                     };
                 }); 
             } else {
-                res.status(500).json({ error: 'User does not exist.' })
+                return res.status(500).json({ error: 'User does not exist.' })
             };
         })
     .catch(err => res.status(500).json({error: err}));
