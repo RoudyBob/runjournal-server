@@ -44,7 +44,7 @@ router.put('/:id', validateSession, function (req, res) {
     const updateUser = {
         firstname: req.body.user.firstname,
         lastname: req.body.user.lastname,
-        birthdate: req.body.user.birthdate,
+        email: req.body.user.email,
         weekstart: req.body.user.weekstart,
         defaultunits: req.body.user.defaultunits,
         coach: req.body.user.coach,
@@ -88,11 +88,13 @@ router.post('/login', function (req, res) {
     .catch(err => res.status(500).json({error: err}));
 })
 
+// This endpoint gets user information by ID
 router.get('/:id', validateSession, function (req, res) {
     if (req.user.id == req.params.id) {
 
         const query = {
-            where: {id: req.params.id}
+            where: {id: req.params.id},
+            include: "team"
         }
     
         User.findOne(query)
@@ -123,15 +125,5 @@ router.get('/:id', validateSession, function (req, res) {
         return res.status(403).json({ message: "Access Denied." })
     }
 });
-
-router.get('/', validateSession, function (req, res) {
-    User.findAll({
-        where: {coach: true},
-        attributes: ['id', 'email', 'firstname', 'lastname'],
-        include: "team"
-    })
-    .then(users => res.status(200).json(users))
-    .catch(err => res.status(500).json({ error: err }));
-})
 
 module.exports = router;

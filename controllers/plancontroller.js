@@ -13,7 +13,7 @@ router.post('/', validateSession, function (req, res) {
         units: req.body.plan.units,
         time: req.body.plan.time,
         notes: req.body.plan.notes,
-        userId: req.user.id
+        userId: req.body.plan.userId
     })
     .then(plan => res.status(200).json(plan))
     .catch(err => res.status(500).json({ error: err }));

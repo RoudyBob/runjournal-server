@@ -5,52 +5,61 @@ const router = Router();
 
 // This endpoint creates a new workout. Coaches don't need access.
 router.post('/', validateSession, function (req, res) {
-    Workout.create({
-        timestamp: req.body.workout.timestamp,
-        description: req.body.workout.description,
-        distance: req.body.workout.distance,
-        units: req.body.workout.units,
-        movingtime: req.body.workout.movingtime,
-        elapsedtime: req.body.workout.elapsedtime,
-        elevationgain: req.body.workout.elevationgain,
-        startlocation: req.body.workout.startlocation,
-        endlocation: req.body.workout.endlocation,
-        temp: req.body.workout.temp,
-        humidity: req.body.workout.humidity,
-        aqi: req.body.workout.aqi,
-        notes: req.body.workout.notes,
-        sourceid: req.body.workout.sourceid,
-        userId: req.user.id
-    })
-    .then((workout) => res.status(200).json(workout))
-    .catch((err) => res.status(500).json({ error: err }));
+    if (req.user.id === req.body.workout.userId) {
+        Workout.create({
+            timestamp: req.body.workout.timestamp,
+            description: req.body.workout.description,
+            distance: req.body.workout.distance,
+            units: req.body.workout.units,
+            movingtime: req.body.workout.movingtime,
+            elapsedtime: req.body.workout.elapsedtime,
+            elevationgain: req.body.workout.elevationgain,
+            startlocation: req.body.workout.startlocation,
+            endlocation: req.body.workout.endlocation,
+            temp: req.body.workout.temp,
+            humidity: req.body.workout.humidity,
+            aqi: req.body.workout.aqi,
+            notes: req.body.workout.notes,
+            sourceid: req.body.workout.sourceid,
+            userId: req.body.workout.userId
+        })
+        .then((workout) => res.status(200).json(workout))
+        .catch((err) => res.status(500).json({ error: err }));
+    } else {
+        res.status(403).json({ error: "Denied - Coaches can't create or update workouts." })
+    }
 });
 
 // This endpoint updates a workout based on an ID
 // Don't need coaches to be able to do this. They are only going to modify plans.
 router.put('/update/:id', validateSession, function (req, res) {
-    const updateWorkout = {
-        timestamp: req.body.workout.timestamp,
-        description: req.body.workout.description,
-        distance: req.body.workout.distance,
-        units: req.body.workout.units,
-        movingtime: req.body.workout.movingtime,
-        elapsedtime: req.body.workout.elapsedtime,
-        elevationgain: req.body.workout.elevationgain,
-        startlocation: req.body.workout.startlocation,
-        endlocation: req.body.workout.endlocation,
-        temp: req.body.workout.temp,
-        humidity: req.body.workout.humidity,
-        aqi: req.body.workout.aqi,
-        notes: req.body.workout.notes,
-        sourceid: req.body.workout.sourceid,
-    };
-
-    const query = { where: { id: req.params.id, userId: req.user.id }};
-
-    Workout.update(updateWorkout, query)
-    .then((rowsAffected) => res.status(200).json({message: `${rowsAffected} entries updated.`}))
-    .catch((err) => res.status(500).json({ error: err }));
+    if (req.user.id === req.body.workout.userId) {
+        const updateWorkout = {
+            timestamp: req.body.workout.timestamp,
+            description: req.body.workout.description,
+            distance: req.body.workout.distance,
+            units: req.body.workout.units,
+            movingtime: req.body.workout.movingtime,
+            elapsedtime: req.body.workout.elapsedtime,
+            elevationgain: req.body.workout.elevationgain,
+            startlocation: req.body.workout.startlocation,
+            endlocation: req.body.workout.endlocation,
+            temp: req.body.workout.temp,
+            humidity: req.body.workout.humidity,
+            aqi: req.body.workout.aqi,
+            notes: req.body.workout.notes,
+            sourceid: req.body.workout.sourceid,
+            userId: req.body.workout.userId
+        };
+    
+        const query = { where: { id: req.params.id, userId: req.user.id }};
+    
+        Workout.update(updateWorkout, query)
+        .then((rowsAffected) => res.status(200).json({message: `${rowsAffected} entries updated.`}))
+        .catch((err) => res.status(500).json({ error: err }));
+    } else {
+        return res.status(403).json({ error: "Access Denied." })
+    }
 })
 
 // This endpoint gets all workouts for the logged in user
@@ -145,7 +154,13 @@ router.delete('/:id', validateSession, function (req, res) {
     }
 
     Workout.destroy(query)
-        .then((rowsAffected) => res.status(200).json({message: `${rowsAffected} entries deleted.`}))
+        .then((rowsAffected) => {
+            if (rowsAffected > 0) {
+                res.status(200).json({message: `${rowsAffected} entries deleted.`})
+            } else {
+                res.status(200).json({error: `No entries deleted.`})
+            }
+        })
         .catch((err) => res.status(500).json({ error: err }));
 })
 
