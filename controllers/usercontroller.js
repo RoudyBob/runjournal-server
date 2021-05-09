@@ -23,13 +23,15 @@ router.post('/signup', function (req, res) {
                 Team.create({
                     firstname: req.body.user.firstname,
                     lastname: req.body.user.lastname,
+                    runners: [],
                     userId: user.id,
                 })
                 .then(team => res.status(200).json(team))
                 .catch(err => res.status(500).json({ error: err }))
             }
            let token = jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24});
-           res.json({
+           console.log(user)
+           res.status(200).json({
                user: user,
                message: "User successfully registered!",
                sessionToken: token
@@ -43,23 +45,11 @@ router.put('/:id', validateSession, function (req, res) {
     const updateUser = {
         firstname: req.body.user.firstname,
         lastname: req.body.user.lastname,
-        birthdate: req.body.user.birthdate,
+        email: req.body.user.email,
         weekstart: req.body.user.weekstart,
         defaultunits: req.body.user.defaultunits,
         coach: req.body.user.coach,
     };
-
-    // if (req.body.user.coach === true) {
-    //     Team.create({
-    //         firstname: req.body.user.firstname,
-    //         lastname: req.body.user.lastname,
-    //         userId: req.user.id,
-    //     })
-    //     .then(team => res.status(200).json(team))
-    //     .catch(err => res.status(500).json({ error: err }))
-    // }
-
-    // Add in here check to see if it changed and handle appropriately
 
     const query = { where: { id: req.params.id, id: req.user.id }};
 
@@ -89,31 +79,52 @@ router.post('/login', function (req, res) {
                         })
 
                     } else {
-                        res.status(502).send({ error: 'Login Failed' });
+                        return res.status(502).send({ error: 'Login Failed' });
                     };
                 }); 
             } else {
-                res.status(500).json({ error: 'User does not exist.' })
+                return res.status(500).json({ error: 'User does not exist.' })
             };
         })
     .catch(err => res.status(500).json({error: err}));
 })
 
-router.get('/', validateSession, function (req, res) {
-    User.findAll({
-        where: {coach: true},
-        attributes: ['id', 'email', 'firstname', 'lastname'],
-        include: "team"
-    })
-    .then(users => res.status(200).json(users))
-    .catch(err => res.status(500).json({ error: err }));
-})
+// This endpoint gets user information by ID
+router.get('/:id', validateSession, function (req, res) {
+    if (req.user.id == req.params.id) {
 
-// router.get('/', validateSession, function (req, res) {
-//     console.log(req);
-//     User.findAll()
-//     .then(users => res.status(200).json(users))
-//     .catch(err => res.status(500).json({ error: err }))
-// });
+        const query = {
+            where: {id: req.params.id},
+            include: "team"
+        }
+    
+        User.findOne(query)
+            .then((user) => res.status(200).json(user))
+            .catch((err) => res.status(500).json({ error: err }));
+
+    } else if (req.user.team) {
+        if (req.user.team.runners) {
+            if (!req.user.team.runners.includes(parseInt(req.params.id))) {
+                // Deny access if not a coach and the id doesn't match one of their runners
+                return res.status(403).json({ message: "You are not this runner's coach." })
+            } 
+        } else if (req.user.team.runners === null) {
+                // Deny access if not a coach has no runners
+                return res.status(403).json({ message: "You are not this runner's coach", team: req.user.team })
+        }
+
+        const query = {
+            where: {id: req.params.id}
+        }
+    
+        User.findOne(query)
+            .then((user) => res.status(200).json(user))
+            .catch((err) => res.status(500).json({ error: err }));
+
+    } else {
+        // User Doesn't Match and They Aren't a Coach
+        return res.status(403).json({ message: "Access Denied." })
+    }
+});
 
 module.exports = router;
