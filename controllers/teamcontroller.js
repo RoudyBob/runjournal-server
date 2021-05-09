@@ -17,27 +17,37 @@ router.post('/', validateSession, function (req, res) {
     .catch(err => res.status(500).json({ error: err }))
 });
 
-router.put('/join/:teamid', validateSession, function (req, res) {
+router.get('/', validateSession, function (req, res) {
+    const query = {}
+
+
+    Team.findAll(query)
+    .then(teams => res.status(200).json(teams))
+    .catch(err => res.status(500).json({ error: err }));
+})
+
+router.put('/join/:coachid', validateSession, function (req, res) {
     Team.update(
         {runners: Sequelize.fn('array_append', Sequelize.col('runners'), req.user.id)},
-        {where: {id: req.params.teamid}}
+        {where: {userId: req.params.coachid}}
     )
     .then(rowsAffected => res.status(200).json(rowsAffected))
     .catch(err => res.status(500).json({error:err}))
 });
 
-router.put('/leave/:teamid', validateSession, function (req, res) {
+router.put('/leave/:coachid', validateSession, function (req, res) {
     Team.update(
         {runners: Sequelize.fn('array_remove', Sequelize.col('runners'), req.user.id)},
-        {where: {id: req.params.teamid}}
+        {where: {userId: req.params.coachid}}
     )
     .then(rowsAffected => res.status(200).json(rowsAffected))
     .catch(err => res.status(500).json({error:err}))
 });
 
-router.delete('/:id', validateSession, function (req, res) {
+// Deletes the team associated with the logged in user ID
+router.delete('/', validateSession, function (req, res) {
     const query = {
-        where: {id: req.params.id, userId: req.user.id}
+        where: {userId: req.user.id},
     }
 
     Team.destroy(query)
