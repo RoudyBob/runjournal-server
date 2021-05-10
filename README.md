@@ -2,6 +2,13 @@
 
 Whether you consider yourself a hobby jogger or a competitive runner, RunJournal makes it easy for you to build and manage a training plan for your next goal race.
 
+## Technical Details
+Port, JWT Secret and Database Connection string defined in .env locally. Need to recreate when cloning.
+
+4 controllers provide a variety of endpoints for CRUD operations for plans, workouts and teams and users.
+
+Secured endpoints require authentication and, when accessed by a coach, provide additional checks to be sure that the user has permissions to perform those operations. Coaches can not create, modify or delete workouts for example.
+
 ## User Stories
 
 Most runners have heard that it's smart to have a solid plan and follow that plan as closely as then can if they want to become stronger over time and have success in any sort of competitive event. Doing too much work can lead to injury and burnout, while not doing enough will leave them toeing the start line of their chosen goal race underprepared. Even if someone isn't looking to compete and is just looking to enjoy the benefits of running on a regular basis, it's motivating to keep track of their progress and the volume of work they are able to do.
