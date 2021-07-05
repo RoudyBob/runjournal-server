@@ -30,6 +30,39 @@ router.post('/', validateSession, function (req, res) {
     }
 });
 
+// This endpoint creates a new workout as part of an import operation. Only creates new record if one doesn't exist.
+router.post('/import', validateSession, function (req, res) {
+    if (req.user.id === req.body.workout.userId) {
+
+        const query = { sourceid: req.body.workout.sourceid.toString() };
+        const values = {
+            timestamp: req.body.workout.timestamp,
+            description: req.body.workout.description,
+            distance: req.body.workout.distance,
+            units: req.body.workout.units,
+            movingtime: req.body.workout.movingtime,
+            elapsedtime: req.body.workout.elapsedtime,
+            elevationgain: req.body.workout.elevationgain,
+            startlocation: req.body.workout.startlocation,
+            endlocation: req.body.workout.endlocation,
+            temp: req.body.workout.temp,
+            humidity: req.body.workout.humidity,
+            aqi: req.body.workout.aqi,
+            notes: req.body.workout.notes,
+            sourceid: req.body.workout.sourceid,
+            userId: req.body.workout.userId
+        }
+        Workout.findOrCreate({
+            where: query, 
+            defaults: values
+        })
+        .then((workout) => res.status(200).json(workout))
+        .catch((err) => res.status(500).json({ error: err }));
+    } else {
+        res.status(403).json({ error: "Denied - Coaches can't create or update workouts." })
+    }
+});
+
 // This endpoint updates a workout based on an ID
 // Don't need coaches to be able to do this. They are only going to modify plans.
 router.put('/update/:id', validateSession, function (req, res) {
